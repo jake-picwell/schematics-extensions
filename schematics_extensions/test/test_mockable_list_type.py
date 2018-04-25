@@ -7,7 +7,7 @@ from ..models import Model
 from ..mockable_list_type import MockableListType
 from ..mockable_model_type import MockableModelType
 
-from schematics.exceptions import ValidationError
+from schematics.exceptions import DataError
 
 
 class ExampleSubmodel(Model):
@@ -46,8 +46,8 @@ def test_list_model_field_exception_with_full_message():
 
     g = Group({'users': [{'name': "ToLongName"}]})
 
-    with pytest.raises(ValidationError) as exception:
+    with pytest.raises(DataError) as exception:
         g.validate()
-    assert exception.value.messages == {
-        'users': [{'name': ['String value is too long.']}]
-    }
+        assert exception.value.messages == {
+            'users': [{'name': ['String value is too long.']}]
+        }

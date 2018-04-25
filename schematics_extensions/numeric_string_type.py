@@ -19,7 +19,7 @@ class NumericStringType(StringType):
     """
 
     MESSAGES = {
-        'length': u'Value is not a numeric string of length %d',
+        'absolute_length': u'Value is not a numeric string of length %d',
         'digits': u'Value contains characters other than numeric digits',
     }
 
@@ -37,6 +37,7 @@ class NumericStringType(StringType):
         if re.compile(r'\D').match(value):
             raise ValidationError(self.messages['digits'])
 
-    def validate_length(self, value):
+    def validate_absolute_length(self, value):
         if self.length and len(value) != self.length:
-            raise ValidationError(self.messages['length'] % self.length)
+            raise ValidationError(self.messages['absolute_length']
+                                  % self.length)

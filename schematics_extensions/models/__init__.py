@@ -1,6 +1,22 @@
-from schematics.models import Model
-from schematics.exceptions import BaseError, ModelValidationError
-from .validate import validate
+import copy
+
+from schematics.models import Model, ModelDict
+
+
+def __deepcopy__(self, memo):
+    """
+    This is here temporarily to resolve an issue with schematics models not
+    being able to be deepcopied/pickled.
+
+    Open issue here: https://github.com/schematics/schematics/issues/510
+    """
+    copied = ModelDict(
+        *map(lambda o: copy.deepcopy(o, memo), [
+            self._unsafe, self._converted, self._ModelDict__valid])
+    )
+    return copied
+
+ModelDict.__deepcopy__ = __deepcopy__
 
 
 class Model(Model):
@@ -19,29 +35,6 @@ class Model(Model):
                 values[name] = field.null()
         values.update(overrides)
         return cls(values)
-
-    def validate(self, partial=False, strict=False):
-        """
-        Validates the state of the model and adding additional untrusted data
-        as well. If the models is invalid, raises ValidationError with error
-        messages.
-
-        THIS IS BEING OVERRIDDEN TEMPORARILY UNTIL THE VALIDATION ORDERING
-        FIX IS RELEASED TO SCHEMATICS
-
-        :param partial:
-            Allow partial data to validate; useful for PATCH requests.
-            Essentially drops the ``required=True`` arguments from field
-            definitions. Default: False
-        :param strict:
-            Complain about unrecognized keys. Default: False
-        """
-        try:
-            data = validate(self.__class__, self._data, partial=partial,
-                            strict=strict)
-            self._data.update(**data)
-        except BaseError as exc:
-            raise ModelValidationError(exc.messages)
 
     def __repr__(self):
         return "{}({!r})".format(self.__class__.__name__, self._data)

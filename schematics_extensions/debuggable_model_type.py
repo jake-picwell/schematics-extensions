@@ -17,3 +17,8 @@ class DebuggableModel(Model):
             'default': blacklist('debug'),
             'debug': blacklist()
         }
+
+    def to_primitive(self, *args, **kwargs):
+        """ Don't require submodels to have parent's 'debug' role."""
+        return super(DebuggableModel, self).to_primitive(
+            raise_error_on_role=False, *args, **kwargs)
